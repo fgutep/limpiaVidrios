@@ -1,0 +1,169 @@
+(footprint "USBC-LiPo-ChargingModule"
+	(version 20240108)
+	(generator "pcbnew")
+	(generator_version "8.0")
+	(layer "F.Cu")
+	(property "Reference" "TP4056-USB-C"
+		(at 0.95 -10.55 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "5f2b32fd-1457-4696-bbb7-ba8541b77a3b")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "Val**"
+		(at 0 -21.5 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "bacfdc44-3cbd-4730-9d13-11a30af2010c")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Footprint" ""
+		(at 0 -17.5 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "9adbb886-690f-4238-9091-0ba6d1b37556")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 -17.5 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "c2aa5d67-9e16-4886-9005-0e478e0a6683")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "USBC-LiPo-ChargingModule"
+		(at 0 -2.4 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "9756f920-501f-4666-8297-2b22708eb9c7")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr through_hole)
+	(fp_line
+		(start 14.1 -18)
+		(end 11.9 -18)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "32247883-2e0f-451f-ba20-290dcd52be68")
+	)
+	(fp_rect
+		(start -14.1 -18)
+		(end 14.1 -0.55)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(fill none)
+		(layer "F.SilkS")
+		(uuid "896671b5-8c96-4afe-92ee-b4a619230ef5")
+	)
+	(fp_rect
+		(start -14.1 -13.725)
+		(end -6.1 -4.725)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(fill none)
+		(layer "F.SilkS")
+		(uuid "36d36f17-15bd-43f4-8133-c695163ed3dc")
+	)
+	(fp_text user "Bat+"
+		(at 6.025 -13.05 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "0bf62eef-0237-4490-87df-652ccedbe422")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
+	)
+	(fp_text user "Bat-"
+		(at 5.85 -4.6 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "49e7387f-235d-4231-8a6b-31f04eff8772")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
+	)
+	(fp_text user "USB"
+		(at -11.85 -8.625 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "fc87bac2-373f-4a87-97aa-0562a9dedbce")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0.475 -8.375 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "fa0df35d-0897-4fda-9173-d21f481b7f4c")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" thru_hole rect
+		(at 11 -13.45)
+		(size 2 2)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "2f3c22d1-adac-492d-97cc-b33a7f311515")
+	)
+	(pad "2" thru_hole rect
+		(at 11 -5.1)
+		(size 2 2)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "788012a1-bbe7-48ad-8ced-bea00d512ec8")
+	)
+)
