@@ -7,6 +7,7 @@
 		(at 0.95 -10.55 0)
 		(unlocked yes)
 		(layer "F.SilkS")
+		(hide yes)
 		(uuid "5f2b32fd-1457-4696-bbb7-ba8541b77a3b")
 		(effects
 			(font
@@ -81,7 +82,7 @@
 		(start -14.1 -18)
 		(end 14.1 -0.55)
 		(stroke
-			(width 0.1)
+			(width 0.5)
 			(type default)
 		)
 		(fill none)
@@ -92,7 +93,7 @@
 		(start -14.1 -13.725)
 		(end -6.1 -4.725)
 		(stroke
-			(width 0.1)
+			(width 0.5)
 			(type default)
 		)
 		(fill none)
@@ -100,40 +101,29 @@
 		(uuid "36d36f17-15bd-43f4-8133-c695163ed3dc")
 	)
 	(fp_text user "Bat+"
-		(at 6.025 -13.05 0)
+		(at -1.5 -12 0)
 		(unlocked yes)
 		(layer "F.SilkS")
 		(uuid "0bf62eef-0237-4490-87df-652ccedbe422")
 		(effects
 			(font
-				(size 1 1)
-				(thickness 0.1)
+				(size 3 3)
+				(thickness 0.5)
+				(bold yes)
 			)
 			(justify left bottom)
 		)
 	)
 	(fp_text user "Bat-"
-		(at 5.85 -4.6 0)
+		(at -1.5 -3.5 0)
 		(unlocked yes)
 		(layer "F.SilkS")
 		(uuid "49e7387f-235d-4231-8a6b-31f04eff8772")
 		(effects
 			(font
-				(size 1 1)
-				(thickness 0.1)
-			)
-			(justify left bottom)
-		)
-	)
-	(fp_text user "USB"
-		(at -11.85 -8.625 0)
-		(unlocked yes)
-		(layer "F.SilkS")
-		(uuid "fc87bac2-373f-4a87-97aa-0562a9dedbce")
-		(effects
-			(font
-				(size 1 1)
-				(thickness 0.1)
+				(size 3 3)
+				(thickness 0.5)
+				(bold yes)
 			)
 			(justify left bottom)
 		)
