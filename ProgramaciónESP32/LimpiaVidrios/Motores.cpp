@@ -22,32 +22,32 @@ void Motores::lockMotors() {
 
 void Motores::moveForward() {
   digitalWrite(motorAIn1, HIGH);
-  digitalWrite(motorAIn2, HIGH);
+  digitalWrite(motorAIn2, LOW);
   digitalWrite(motorBIn1, HIGH);
-  digitalWrite(motorBIn2, HIGH);
+  digitalWrite(motorBIn2, LOW);
   Serial.println("Moving forward");
 }
 
 void Motores::moveBackward() {
   digitalWrite(motorAIn1, LOW);
-  digitalWrite(motorAIn2, LOW);
-  digitalWrite(motorBIn1, HIGH);
-  digitalWrite(motorBIn2, LOW);
+  digitalWrite(motorAIn2, HIGH);
+  digitalWrite(motorBIn1, LOW);
+  digitalWrite(motorBIn2, HIGH);
   Serial.println("Moving backward");
 }
 
 void Motores::turnLeft() {
-  digitalWrite(motorAIn1, LOW);
-  digitalWrite(motorAIn2, HIGH);
-  digitalWrite(motorBIn1, HIGH);
-  digitalWrite(motorBIn2, LOW);
-  Serial.println("Turning left");
-}
-
-void Motores::turnRight() {
   digitalWrite(motorAIn1, HIGH);
   digitalWrite(motorAIn2, LOW);
   digitalWrite(motorBIn1, LOW);
   digitalWrite(motorBIn2, HIGH);
+  Serial.println("Turning left");
+}
+
+void Motores::turnRight() {
+  digitalWrite(motorAIn1, LOW);
+  digitalWrite(motorAIn2, HIGH);
+  digitalWrite(motorBIn1, HIGH);
+  digitalWrite(motorBIn2, LOW);
   Serial.println("Turning right");
 }

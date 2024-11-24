@@ -1,196 +1,144 @@
 #include <Bluepad32.h>
-#include "Motores.h"
 
-// Definición de pines de los motores
-#define MOTOR_A_IN1 37
-#define MOTOR_A_IN2 38
-#define MOTOR_B_IN1 20
-#define MOTOR_B_IN2 21
-#define EEP 12
+#define MOTOR_B_IN2 18  // GPIO for MOTOR_B_IN2
+#define MOTOR_B_IN1 17  // GPIO for MOTOR_B_IN1
+#define MOTOR_A_IN2 16  // GPIO for MOTOR_A_IN2
+#define MOTOR_A_IN1 15  // GPIO for MOTOR_A_IN1
 
-// Instancias globales
-Motores motor(MOTOR_A_IN1, MOTOR_A_IN2, MOTOR_B_IN1, MOTOR_B_IN2, EEP);
+#define FACTORA 1.0  // GPIO for MOTOR_A_IN2
+#define FACTORB 0.855  // GPIO for MOTOR_A_IN2
+
+
+
+#define PWM_FREQ 20000  // Frecuencia de 20 kHz para eliminar el ruido audible
+#define PWM_RESOLUTION 8  // Resolución de 8 bits
+#define PWM_CHANNEL_A_IN1 0
+#define PWM_CHANNEL_A_IN2 1
+#define PWM_CHANNEL_B_IN1 2
+#define PWM_CHANNEL_B_IN2 3
+
 ControllerPtr myControllers[BP32_MAX_GAMEPADS];
 
-// This callback gets called any time a new gamepad is connected.
-// Up to 4 gamepads can be connected at the same time.
 void onConnectedController(ControllerPtr ctl) {
-    bool foundEmptySlot = false;
-    for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
-        if (myControllers[i] == nullptr) {
-            Serial.printf("CALLBACK: Controller is connected, index=%d\n", i);
-            // Additionally, you can get certain gamepad properties like:
-            // Model, VID, PID, BTAddr, flags, etc.
-            ControllerProperties properties = ctl->getProperties();
-            Serial.printf("Controller model: %s, VID=0x%04x, PID=0x%04x\n", ctl->getModelName().c_str(), properties.vendor_id,
-                           properties.product_id);
-            myControllers[i] = ctl;
-            foundEmptySlot = true;
-            break;
-        }
+  for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
+    if (myControllers[i] == nullptr) {
+      myControllers[i] = ctl;
+      Serial.printf("Controller connected, index=%d\n", i);
+      break;
     }
-    if (!foundEmptySlot) {
-        Serial.println("CALLBACK: Controller connected, but could not found empty slot");
-    }
+  }
 }
 
 void onDisconnectedController(ControllerPtr ctl) {
-    bool foundController = false;
-
-    for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
-        if (myControllers[i] == ctl) {
-            Serial.printf("CALLBACK: Controller disconnected from index=%d\n", i);
-            myControllers[i] = nullptr;
-            foundController = true;
-            break;
-        }
-    }
-
-    if (!foundController) {
-        Serial.println("CALLBACK: Controller disconnected, but not found in myControllers");
-    }
-}
-
-void dumpGamepad(ControllerPtr ctl) {
-    Serial.printf(
-        "idx=%d, dpad: 0x%02x, buttons: 0x%04x, axis L: %4d, %4d\n",  // Agregamos una coma aquí
-        ctl->index(),         // Controller Index
-        ctl->dpad(),          // D-pad
-        ctl->buttons(),       // bitmask of pressed buttons
-        ctl->axisX(),         // (-511 - 512) left X Axis
-        ctl->axisY()          // (-511 - 512) left Y axis
-    );
-}
-
-
-void processGamepad(ControllerPtr ctl) {
-    // There are different ways to query whether a button is pressed.
-    // By query each button individually:
-    //  a(), b(), x(), y(), l1(), etc...
-    //flecha a la derecha
-    if (ctl->dpad() == 0x04) {
-        motor.turnRight();
-        delay(100);
-    }
-    //flecha a la izquierda
-    if (ctl->dpad() == 0x08) {
-        motor.turnLeft();
-        delay(100);
-    }
-    //flechaabajo
-    if (ctl->dpad() == 0x02) {
-        motor.moveBackward();
-        delay(100);
-    }
-    //flechaarriba
-    if (ctl->dpad() == 0x01) {
-        motor.moveForward();
-        delay(100);
-    }
-     // Verificación de inactividad en dpad, buttons, axisX y axisY
-    if (ctl->dpad() == 0x00 && ctl->buttons() == 0x0000) {
-        motor.lockMotors();
-    }
-    //Definicion actividad segun el movimiento del joystick
-    int x = ctl->axisX();
-    int y = ctl->axisY();
-
-    //if (x >= -8 && x <= 8 && y >= -8 && y <= 8) {
-      // Se discrimina el rango de -8 a 8 de x,y dado que el control cuenta con un pequeño error de fabricacion
-      // donde a pesar no estar siendo manipulado muestra un movimiento leve en estos ejes
-    //    motor.lockMotors();
-    //} else {
-        // Movimiento según el valor de `x` y `y`
-        //if (y > 8) {
-            //motor.moveForward();
-        //} else if (y < -8) {
-            //motor.moveBackward();
-        //}
-        // (x > 8) {
-            //motor.turnRight();
-        //} else if (x < -8) {
-            //motor.turnLeft();
-        //}
-    //}
-
-
-    // Another way to query controller data is by getting the buttons() function.
-    // See how the different "dump*" functions dump the Controller info.
-    dumpGamepad(ctl);
-}
-
-
-void processControllers() {
-    for (auto myController : myControllers) {
-        if (myController && myController->isConnected() && myController->hasData()) {
-            if (myController->isGamepad()) {
-                processGamepad(myController);
-            } 
-        }
-    }
-}
-
-// Arduino setup function. Runs in CPU 1
-void setup() {
-    Serial.begin(115200);
-    Serial.printf("Firmware: %s\n", BP32.firmwareVersion());
-    const uint8_t* addr = BP32.localBdAddress();
-    Serial.printf("BD Addr: %2X:%2X:%2X:%2X:%2X:%2X\n", addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
-
-    // Setup the Bluepad32 callbacks
-    BP32.setup(&onConnectedController, &onDisconnectedController);
-
-    // "forgetBluetoothKeys()" should be called when the user performs
-    // a "device factory reset", or similar.
-    // Calling "forgetBluetoothKeys" in setup() just as an example.
-    // Forgetting Bluetooth keys prevents "paired" gamepads to reconnect.
-    // But it might also fix some connection / re-connection issues.
-    BP32.forgetBluetoothKeys();
-
-    // Enables mouse / touchpad support for gamepads that support them.
-    // When enabled, controllers like DualSense and DualShock4 generate two coxnnected devices:
-    // - First one: the gamepad
-    // - Second one, which is a "virtual device", is a mouse.
-    // By default, it is disabled.
-    BP32.enableVirtualDevice(false);
-}
-
-// Arduino loop function. Runs in CPU 1.
-void loop() {
-  // This call fetches all the controllers' data.
-  // Call this function in your main loop.
-  bool dataUpdated = BP32.update();
-  if (dataUpdated){
-    processControllers();
-    }
-  // Procesa comandos de teclado
-  if (Serial.available() > 0) {
-    char command = Serial.read();
-    switch (command) {
-      case 'w':
-        motor.moveForward();
-        delay(100);
-        break;
-      case 's':
-        motor.moveBackward();
-        delay(100);
-        break;
-      case 'a':
-        motor.turnLeft();
-        delay(100);
-        break;
-      case 'd':
-        motor.turnRight();
-        delay(100);
-        break;
-      case 'x':
-        motor.lockMotors();
-        delay(100);
-
-
+  for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
+    if (myControllers[i] == ctl) {
+      myControllers[i] = nullptr;
+      Serial.printf("Controller disconnected, index=%d\n", i);
+      break;
     }
   }
+}
 
-  delay(150);  // Pequeño retardo para evitar sobrecarga
+void processControllerInput(ControllerPtr ctl) {
+  uint8_t dpad = ctl->dpad();
+
+  if (dpad & DPAD_UP) {  // Forward
+    forward(255);
+  } else if (dpad & DPAD_DOWN) {  // Backward
+    backward(255);
+  } else if (dpad & DPAD_LEFT) {  // Left
+    left(255);
+  } else if (dpad & DPAD_RIGHT) {  // Right
+    right(255);
+  } else {
+    motorOFF();
+  }
+}
+
+void setup() {
+  // Initialize motor control pins
+  pinMode(MOTOR_A_IN1, OUTPUT);
+  pinMode(MOTOR_A_IN2, OUTPUT);
+  pinMode(MOTOR_B_IN1, OUTPUT);
+  pinMode(MOTOR_B_IN2, OUTPUT);
+
+  // Setup PWM channels
+  ledcSetup(PWM_CHANNEL_A_IN1, PWM_FREQ, PWM_RESOLUTION);
+  ledcSetup(PWM_CHANNEL_A_IN2, PWM_FREQ, PWM_RESOLUTION);
+  ledcSetup(PWM_CHANNEL_B_IN1, PWM_FREQ, PWM_RESOLUTION);
+  ledcSetup(PWM_CHANNEL_B_IN2, PWM_FREQ, PWM_RESOLUTION);
+
+  ledcAttachPin(MOTOR_A_IN1, PWM_CHANNEL_A_IN1);
+  ledcAttachPin(MOTOR_A_IN2, PWM_CHANNEL_A_IN2);
+  ledcAttachPin(MOTOR_B_IN1, PWM_CHANNEL_B_IN1);
+  ledcAttachPin(MOTOR_B_IN2, PWM_CHANNEL_B_IN2);
+
+  // Start serial communication
+  Serial.begin(115200);
+
+  // Turn off motor initially
+  motorOFF();
+  
+  // Setup the Bluepad32 callbacks
+  BP32.setup(&onConnectedController, &onDisconnectedController);
+}
+
+void loop() {
+  // Fetch controller data
+  BP32.update();
+
+  // Process controller input
+  for (auto myController : myControllers) {
+    if (myController && myController->isConnected()) {
+      processControllerInput(myController);
+    }
+  }
+}
+
+void motorOFF() {
+  ledcWrite(PWM_CHANNEL_A_IN1, 0);
+  ledcWrite(PWM_CHANNEL_A_IN2, 0);
+  ledcWrite(PWM_CHANNEL_B_IN1, 0);
+  ledcWrite(PWM_CHANNEL_B_IN2, 0);
+}
+
+void forward(int speed) {
+  int correctedSpeedA = speed * FACTORA;  // No corrección para motor A
+  int correctedSpeedB = speed * FACTORB;  // Corrección del 90% para motor B
+  ledcWrite(PWM_CHANNEL_A_IN1, correctedSpeedA);
+  ledcWrite(PWM_CHANNEL_A_IN2, 0);
+  ledcWrite(PWM_CHANNEL_B_IN1, correctedSpeedB);
+  ledcWrite(PWM_CHANNEL_B_IN2, 0);
+  Serial.println("Moving forward");
+}
+
+void backward(int speed) {
+  int correctedSpeedA = speed * FACTORA;
+  int correctedSpeedB = speed * FACTORB;
+  ledcWrite(PWM_CHANNEL_A_IN1, 0);
+  ledcWrite(PWM_CHANNEL_A_IN2, correctedSpeedA);
+  ledcWrite(PWM_CHANNEL_B_IN1, 0);
+  ledcWrite(PWM_CHANNEL_B_IN2, correctedSpeedB);
+  Serial.println("Moving backward");
+}
+
+void left(int speed) {
+  int correctedSpeedA = speed * FACTORA;
+  int correctedSpeedB = speed * FACTORB;
+  ledcWrite(PWM_CHANNEL_A_IN1, correctedSpeedA);
+  ledcWrite(PWM_CHANNEL_A_IN2, 0);
+  ledcWrite(PWM_CHANNEL_B_IN1, 0);
+  ledcWrite(PWM_CHANNEL_B_IN2, correctedSpeedB);
+  Serial.println("Turning left");
+}
+
+void right(int speed) {
+  int correctedSpeedA = speed * FACTORA;
+  int correctedSpeedB = speed * FACTORB;
+  ledcWrite(PWM_CHANNEL_A_IN1, 0);
+  ledcWrite(PWM_CHANNEL_A_IN2, correctedSpeedA);
+  ledcWrite(PWM_CHANNEL_B_IN1, correctedSpeedB);
+  ledcWrite(PWM_CHANNEL_B_IN2, 0);
+  Serial.println("Turning right");
 }
 
