@@ -2,10 +2,10 @@
 #include "Motores.h"
 
 // Definición de pines de los motores
-#define MOTOR_A_IN1 5
-#define MOTOR_A_IN2 18
-#define MOTOR_B_IN1 17
-#define MOTOR_B_IN2 6
+#define MOTOR_A_IN1 37
+#define MOTOR_A_IN2 38
+#define MOTOR_B_IN1 20
+#define MOTOR_B_IN2 21
 #define EEP 12
 
 // Instancias globales
@@ -148,7 +148,7 @@ void setup() {
     BP32.forgetBluetoothKeys();
 
     // Enables mouse / touchpad support for gamepads that support them.
-    // When enabled, controllers like DualSense and DualShock4 generate two connected devices:
+    // When enabled, controllers like DualSense and DualShock4 generate two coxnnected devices:
     // - First one: the gamepad
     // - Second one, which is a "virtual device", is a mouse.
     // By default, it is disabled.
@@ -183,10 +183,11 @@ void loop() {
         motor.turnRight();
         delay(100);
         break;
-      default:
+      case 'x':
         motor.lockMotors();
-        Serial.println("Comando inválido. Usa W (adelante), S (atrás), A (izquierda), D (derecha)");
-        break;
+        delay(100);
+
+
     }
   }
 

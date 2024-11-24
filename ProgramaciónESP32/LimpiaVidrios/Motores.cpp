@@ -14,22 +14,25 @@ void Motores::setup() {
 }
 
 void Motores::lockMotors() {
-  digitalWrite(eep, HIGH);  // Asume que se usa EEP como pin adicional
+  digitalWrite(motorAIn1, LOW); 
+  digitalWrite(motorAIn2, LOW);
+  digitalWrite(motorBIn1, LOW);
+  digitalWrite(motorBIn2, LOW);
 }
 
 void Motores::moveForward() {
   digitalWrite(motorAIn1, HIGH);
-  digitalWrite(motorAIn2, LOW);
+  digitalWrite(motorAIn2, HIGH);
   digitalWrite(motorBIn1, HIGH);
-  digitalWrite(motorBIn2, LOW);
+  digitalWrite(motorBIn2, HIGH);
   Serial.println("Moving forward");
 }
 
 void Motores::moveBackward() {
   digitalWrite(motorAIn1, LOW);
-  digitalWrite(motorAIn2, HIGH);
-  digitalWrite(motorBIn1, LOW);
-  digitalWrite(motorBIn2, HIGH);
+  digitalWrite(motorAIn2, LOW);
+  digitalWrite(motorBIn1, HIGH);
+  digitalWrite(motorBIn2, LOW);
   Serial.println("Moving backward");
 }
 
