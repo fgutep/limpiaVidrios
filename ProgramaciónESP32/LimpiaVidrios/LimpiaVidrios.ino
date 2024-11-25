@@ -5,9 +5,12 @@
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_TCS34725.h>
 #include <Adafruit_Sensor.h>
+#include <Adafruit_NeoPixel.h>
 
 #define SDA_PIN 14  // SDA pin
 #define SCL_PIN 13  // SCL pin
+#define NEOPIXEL_PIN 10  // Neopixel pin
+#define NEOPIXEL_COUNT 4  // Number of NeoPixel LEDs
 
 #define MOTOR_B_IN2 18  // GPIO for MOTOR_B_IN2
 #define MOTOR_B_IN1 17  // GPIO for MOTOR_B_IN1
@@ -22,10 +25,9 @@
 #define PWM_CHANNEL_B_IN1 2
 #define PWM_CHANNEL_B_IN2 3
 
-const float voltage_offset = 3.3;
-
 const char* ap_ssid = "ESP32_Limpiavidrios";  // Nombre de la red creada por el ESP32
 const char* ap_password = "12345678";         // Contraseña para acceder a la red
+bool var = true;
 
 enum State {
     IDLE,
@@ -42,6 +44,7 @@ AsyncWebServer server(80);
 ControllerPtr myControllers[BP32_MAX_GAMEPADS];
 Adafruit_MPU6050 mpu;
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
 float roll = 0.0, pitch = 0.0, yaw = 0.0;
 float accelX = 0.0, accelY = 0.0, accelZ = 0.0;
@@ -90,6 +93,12 @@ void processControllerInput(ControllerPtr ctl) {
         CORRECTION_FACTOR_B -= 0.001;  // Disminuir el factor de corrección en 0.001
         if (CORRECTION_FACTOR_B <= 0.0) CORRECTION_FACTOR_B = 0.0;  // Asegurar que el factor no sea negativo
         Serial.printf("Correction factor decreased: %.3f\n", CORRECTION_FACTOR_B);
+    }
+    
+    // Verificar si se presiona el botón (valor 0x0080) para cambiar el valor de `var`
+    if (buttons & 0x0200) {
+        var = !var;
+        Serial.printf("Var toggled, new value: %s\n", var ? "true" : "false");
     }
 
     if (dpad & DPAD_UP) {
@@ -156,6 +165,10 @@ void setup() {
     Serial.print("Access Point IP: ");
     Serial.println(IP);
 
+    // Inicializar NeoPixel
+    strip.begin();
+    strip.show();  // Apagar todos los LEDs al inicio
+
     // Configurar el servidor web
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         String json = "{";
@@ -192,10 +205,8 @@ void setup() {
         }
 
         int volt = analogRead(VOLTAGE_SENSOR_PIN); // Leer el voltaje
-        voltage = map(volt, 0, 4095, 0, 25) + voltage_offset;
-        voltage /= 100.0;
-        Serial.print("Voltage: ");
-        Serial.println(voltage);
+        float voltage = 0.00416 * (float)volt + 0.0277;
+
 
         json += "\"voltage\": {";
         json += "\"value\": \"" + String(voltage, 2) + "\"";
@@ -203,7 +214,8 @@ void setup() {
 
         json += "\"controller\": {";
         json += "\"connected\": \"" + String(isControllerConnected ? "true" : "false") + "\",";
-        json += "\"correction_factor\": \"" + String(CORRECTION_FACTOR_B, 3) + "\"";
+        json += "\"correction_factor\": \"" + String(CORRECTION_FACTOR_B, 3) + "\",";
+        json += "\"var\": \"" + String(var) + "\"";
         json += "}";
 
         json += "}";
@@ -222,6 +234,10 @@ void loop() {
             processControllerInput(myControllers[i]);
         }
     }
+
+    int volt = analogRead(VOLTAGE_SENSOR_PIN); // Leer el voltaje
+    voltage = 0.00416 * (float)volt + 0.0277;
+    updateNeoPixel(voltage);
 
     // Máquina de estados
     switch (currentState) {
@@ -295,4 +311,47 @@ void right(int speed) {
     ledcWrite(PWM_CHANNEL_B_IN1, adjustedSpeedB);
     ledcWrite(PWM_CHANNEL_B_IN2, 0);
     Serial.println("Turning right");
+}
+
+void updateNeoPixel(float voltage) {
+    if (voltage >= 7.4) {
+        // All LEDs on
+        for (int i = 0; i < NEOPIXEL_COUNT; i++) {
+            strip.setPixelColor(i, strip.Color(0, 255, 0));  // Green
+        }
+    } else if (voltage >= 7.15) {
+        // 3 LEDs on
+        for (int i = 0; i < 3; i++) {
+            strip.setPixelColor(i, strip.Color(0, 255, 0));  // Green
+        }
+        strip.setPixelColor(3, strip.Color(0, 0, 0));  // Off
+    } else if (voltage >= 6.9) {
+        // 2 LEDs on
+        for (int i = 0; i < 2; i++) {
+            strip.setPixelColor(i, strip.Color(0, 255, 0));  // Green
+        }
+        for (int i = 2; i < NEOPIXEL_COUNT; i++) {
+            strip.setPixelColor(i, strip.Color(0, 0, 0));  // Off
+        }
+    } else if (voltage >= 6.65) {
+        // 1 LED on
+        strip.setPixelColor(0, strip.Color(0, 255, 0));  // Green
+        for (int i = 1; i < NEOPIXEL_COUNT; i++) {
+            strip.setPixelColor(i, strip.Color(0, 0, 0));  // Off
+        }
+    } else if (voltage < 6.4) {
+        // All LEDs blinking
+        for (int i = 0; i < NEOPIXEL_COUNT; i++) {
+            strip.setPixelColor(i, strip.Color(255, 0, 0));  // Red
+        }
+        strip.show();
+        delay(500);
+        for (int i = 0; i < NEOPIXEL_COUNT; i++) {
+            strip.setPixelColor(i, strip.Color(0, 0, 0));  // Off
+        }
+        strip.show();
+        return;
+    }
+
+    strip.show();
 }
